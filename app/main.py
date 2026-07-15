@@ -5,4 +5,4 @@ app  = FastAPI()
 
 @app.get("/")
 async def root():
-  return {"message": "Welcome to AI knowledge chatbot", "databse": settings.database_url, "algorithm": settings.algorithm}
+  return {"message": "Welcome to AI knowledge chatbot"}
