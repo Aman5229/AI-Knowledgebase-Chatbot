@@ -1,7 +1,9 @@
 from fastapi import FastAPI
-from app.core.config import settings
+from app.api.v1.endpoints.document import router as document_router
 
 app  = FastAPI()
+
+app.include_router(document_router)
 
 @app.get("/")
 async def root():

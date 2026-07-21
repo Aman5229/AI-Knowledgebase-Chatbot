@@ -8,4 +8,3 @@ class Document(Base):
   id: Mapped[int] = mapped_column(primary_key=True)
   title: Mapped[str] = mapped_column(String(255), nullable=False)
   filename: Mapped[str] = mapped_column(String(255),nullable=False)
-  
