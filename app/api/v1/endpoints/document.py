@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
+from fastapi import Query
 from app.db.dependecies import get_db
-from app.schemas.document import DocumentCreate, DocumentResponse
+from app.schemas.document import DocumentCreate, DocumentResponse, DocumentListResponse
 from app.services.document_service import DocumentService
 from typing import List
 
@@ -15,9 +15,9 @@ def create_document(
 ):
   return DocumentService.create_document(db, document)
 
-@router.get("/", response_model=List[DocumentResponse])
-def get_documents(db: Session = Depends(get_db)):
-  return DocumentService.get_documents(db)
+@router.get("/", response_model=DocumentListResponse)
+def get_documents(skip: int = Query(0, ge=0), limit: int = Query(10, ge=1, le=100),db: Session = Depends(get_db)):
+  return DocumentService.get_documents(db, skip, limit)
 
 @router.get("/{document_id}", response_model=DocumentResponse)
 def get_document(document_id: int, db: Session = Depends(get_db)):

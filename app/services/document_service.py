@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.models.document import Document
 from app.schemas.document import DocumentCreate
 from sqlalchemy import select
+from sqlalchemy import select, func
 
 class DocumentService:
   @staticmethod
@@ -18,12 +19,18 @@ class DocumentService:
     return document
 
   @staticmethod
-  def get_documents(db: Session) -> list[Document]:
-    stmt = select(Document)
+  def get_documents(db: Session, skip, limit) -> list[Document]:
+    stmt = select(Document).offset(skip).limit(limit)
     result = db.execute(stmt)
     documents = result.scalars().all()
+    total = db.scalar(select(func.count()).select_from(Document))
 
-    return documents
+    return {
+        "items": documents,
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+    }
 
   @staticmethod
   def get_document(db:Session, document_id: int) -> Document | None:

@@ -10,3 +10,9 @@ class DocumentResponse(BaseModel):
   filename: str
 
   model_config = ConfigDict(from_attributes=True)
+
+class DocumentListResponse(BaseModel):
+  items: list[DocumentResponse]
+  total: int
+  skip: int
+  limit: int
