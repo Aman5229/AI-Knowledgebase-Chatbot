@@ -1,18 +1,25 @@
-from pydantic import BaseModel, Field, ConfigDict
+from datetime import datetime
 
-class DocumentCreate(BaseModel):
-  title: str = Field(..., min_length=1, max_length=255)
-  filename: str = Field(..., min_length=1, max_length=255)
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class DocumentUpdate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=255)
+
 
 class DocumentResponse(BaseModel):
-  id: int
-  title: str
-  filename: str
+    id: int
+    title: str
+    filename: str
+    content_type: str
+    uploaded_at: datetime
+    user_id: int
 
-  model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
+
 
 class DocumentListResponse(BaseModel):
-  items: list[DocumentResponse]
-  total: int
-  skip: int
-  limit: int
+    items: list[DocumentResponse]
+    total: int
+    skip: int
+    limit: int

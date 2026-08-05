@@ -1,15 +1,19 @@
 from sqlalchemy.orm import Session
 from app.models.document import Document
-from app.schemas.document import DocumentCreate
-from sqlalchemy import select
+from app.schemas.document import DocumentUpdate
 from sqlalchemy import select, func
+from app.storage.storage import save_file
 
 class DocumentService:
   @staticmethod
-  def create_document(db: Session, document_data: DocumentCreate) -> Document:
+  def upload_document(db, user, title, file):
+    stored_filename, _ = save_file(file)
+
     document = Document(
-      title= document_data.title,
-      filename= document_data.filename
+        title=title,
+        filename=stored_filename,
+        content_type=file.content_type,
+        user_id=user.id,
     )
 
     db.add(document)
@@ -41,7 +45,7 @@ class DocumentService:
     return document
 
   @staticmethod
-  def update_document(db:Session, document_id:  int, document_data: DocumentCreate) -> Document | None:
+  def update_document(db: Session, document_id: int, document_data: DocumentUpdate) -> Document | None:
     stmt = select(Document).where(Document.id == document_id)
     result = db.execute(stmt)
     document = result.scalar_one_or_none()
@@ -50,7 +54,6 @@ class DocumentService:
       return None
 
     document.title = document_data.title
-    document.filename = document_data.filename
 
     db.commit()
     db.refresh(document)
