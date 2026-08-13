@@ -16,3 +16,9 @@ def save_file(file: UploadFile):
         shutil.copyfileobj(file.file, buffer)
 
     return stored_filename, str(destination)
+
+def delete_file(stored_filename: str):
+    file_path = UPLOAD_DIR/ stored_filename
+
+    if file_path.exists():
+        file_path.unlink()

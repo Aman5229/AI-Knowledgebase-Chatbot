@@ -2,25 +2,44 @@ from sqlalchemy.orm import Session
 from app.models.document import Document
 from app.schemas.document import DocumentUpdate
 from sqlalchemy import select, func
-from app.storage.storage import save_file
+from app.storage.storage import save_file, delete_file
+from app.services.pdf_service import PDFService
+from app.models.chunk import Chunk
+from app.services.chunk_service import ChunkingService
 
 class DocumentService:
   @staticmethod
   def upload_document(db, user, title, file):
-    stored_filename, _ = save_file(file)
+    stored_filename, file_path = save_file(file)
 
-    document = Document(
-        title=title,
-        filename=stored_filename,
-        content_type=file.content_type,
-        user_id=user.id,
-    )
+    try:
+      text = PDFService.extract_text(file_path)
+      chunks = ChunkingService.split_text(text)
 
-    db.add(document)
-    db.commit()
-    db.refresh(document)
+      document = Document(
+          title=title,
+          filename=stored_filename,
+          content_type=file.content_type,
+          content=text,
+          user_id=user.id,
+      )
 
-    return document
+      db.add(document)
+      db.flush()
+
+      for index, chunk_text in enumerate(chunks):
+        chunk = Chunk(document_id=document.id, content=chunk_text, chunk_index=index)
+
+        db.add(chunk)
+      
+      db.commit()
+      db.refresh(document)
+
+      return document
+    except Exception:
+      db.rollback()
+      delete_file(stored_filename)
+      raise
 
   @staticmethod
   def get_documents(db: Session, skip, limit) -> list[Document]:
@@ -70,5 +89,7 @@ class DocumentService:
 
     db.delete(document)
     db.commit()
+
+    delete_file(document.filename)
 
     return True

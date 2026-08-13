@@ -15,7 +15,6 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
   return UserService.create_user(db, user_data)
 
 @router.post("/login", response_model=UserToken)
-@router.post("/login", response_model=UserToken)
 def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db)):
     user_data = UserLogin(
         email=form_data.username,
