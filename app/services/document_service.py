@@ -4,9 +4,8 @@ from app.schemas.document import DocumentUpdate
 from sqlalchemy import select, func
 from app.storage.storage import save_file, delete_file
 from app.services.pdf_service import PDFService
-from app.models.chunk import Chunk
 from app.services.chunk_service import ChunkingService
-
+from app.services.document_ingestion_service import DocumentIngestionService
 class DocumentService:
   @staticmethod
   def upload_document(db, user, title, file):
@@ -27,11 +26,11 @@ class DocumentService:
       db.add(document)
       db.flush()
 
-      for index, chunk_text in enumerate(chunks):
-        chunk = Chunk(document_id=document.id, content=chunk_text, chunk_index=index)
-
-        db.add(chunk)
-      
+      DocumentIngestionService.save_chunks(
+        db=db,
+        document_id=documen.id,
+        chunks=chunks
+      )
       db.commit()
       db.refresh(document)
 
